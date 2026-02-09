@@ -1,7 +1,6 @@
 from django.db import models
-
 from datetime import date
-# Create your models here.
+from .services import convert_to_webp
 
 
 
@@ -35,10 +34,13 @@ class Profile(models.Model):
     freelancer = models.CharField(max_length=50, null=True)
 
 
+    def save(self, *args, **kwargs):
+        if self.image and not self.image.name.endswith('.webp'):
+            self.image = convert_to_webp(self.image)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
- 
-
 
     @property
     def calculated_age(self):
@@ -88,14 +90,24 @@ class PortfolioItem(models.Model):
     description = models.TextField(blank=True, null=True)
     category = models.CharField(max_length=100, blank=True, null=True)
     project_date = models.DateField(blank=True, null=True)
-    
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image.name.endswith('.webp'):
+            self.image = convert_to_webp(self.image)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
-    
+
 
 class PortfolioImage(models.Model):
     portfolio_item = models.ForeignKey(PortfolioItem, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='portfolio_images/',null=True, blank=True)
+    image = models.ImageField(upload_to='portfolio_images/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image.name.endswith('.webp'):
+            self.image = convert_to_webp(self.image)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Image for {self.portfolio_item.title}"
