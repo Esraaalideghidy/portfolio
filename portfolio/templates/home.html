@@ -6,7 +6,7 @@
     <!-- Hero Section -->
     <section id="hero" class="hero section dark-background">
 
-      <img src="{{ profile.image.url }}" alt="" data-aos="fade-in" class="">
+      {% if profile and profile.image %}<img src="{{ profile.image.url }}" alt="" data-aos="fade-in" class="">{% endif %}
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
         <h2>{{ profile.name|title }}</h2>
@@ -28,7 +28,7 @@
 
         <div class="row gy-4 justify-content-center">
           <div class="col-lg-4">
-            <img src="{{ profile.image.url }}" style="width:100%; height:75%;" class="img-fluid" alt="">
+            {% if profile and profile.image %}<img src="{{ profile.image.url }}" style="width:100%; height:75%;" class="img-fluid" alt="">{% endif %}
           </div>
           <div class="col-lg-8 content">
             <h2>{{ project.title }}.</h2>
@@ -478,48 +478,88 @@
                 </div>
               {% endfor %}
             {% endif %}
-            <form method="post" action="{% url 'home' %}" class="php-email-form" data-aos="fade-up" data-aos-delay="200">
+            <form id="contact-form" method="post" action="{% url 'home' %}" data-aos="fade-up" data-aos-delay="200">
               {% csrf_token %}
               <div class="row gy-4">
 
                 <div class="col-md-6">
                   <label for="name-field" class="pb-2">Your Name</label>
-                  {% comment %} <input type="text" name="name" id="name-field" class="form-control" required=""> {% endcomment %}
                   {% render_field form.name class="form-control" id="name-field" required="" %}
                 </div>
 
                 <div class="col-md-6">
                   <label for="email-field" class="pb-2">Your Email</label>
-                  {% comment %} <input type="email" class="form-control" name="email" id="email-field" required=""> {% endcomment %}
-                  {% render_field form.email class="form-control" name="email" id="email-field" required="" %}
-
+                  {% render_field form.email class="form-control" id="email-field" required="" %}
                 </div>
 
                 <div class="col-md-12">
                   <label for="subject-field" class="pb-2">Subject</label>
-                  {% comment %} <input type="text" class="form-control" name="subject" id="subject-field" required=""> {% endcomment %}
-                  {% render_field form.subject class="form-control" required="" %}
-
+                  {% render_field form.subject class="form-control" id="subject-field" required="" %}
                 </div>
 
                 <div class="col-md-12">
                   <label for="message-field" class="pb-2">Message</label>
-                  {% comment %} <textarea class="form-control" name="message" rows="10" id="message-field" required=""></textarea> {% endcomment %}
-                  {% render_field form.message class="form-control" required="" %}
-                  
+                  {% render_field form.message class="form-control" id="message-field" required="" %}
                 </div>
 
                 <div class="col-md-12 text-center">
-
-                  <div class="loading">Loading</div>
-                  <div class="error-message"></div>
-                  <div class="sent-message">Your message has been sent. Thank you!</div>
+                  <div class="loading" style="display:none;">Loading</div>
+                  <div class="error-message" style="display:none;"></div>
+                  <div class="sent-message" style="display:none;">Your message has been sent. Thank you!</div>
 
                   <button type="submit">Send Message</button>
                 </div>
 
               </div>
             </form>
+
+            <!-- EmailJS SDK -->
+            <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+            <script>
+              emailjs.init("0v_LiV896YJB9dJ3C");
+
+              document.getElementById('contact-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const form = this;
+                const loading = form.querySelector('.loading');
+                const errorMsg = form.querySelector('.error-message');
+                const sentMsg = form.querySelector('.sent-message');
+
+                loading.style.display = 'block';
+                errorMsg.style.display = 'none';
+                sentMsg.style.display = 'none';
+
+                // 1. حفظ في الداتابيز
+                const formData = new FormData(form);
+                fetch(form.action, {
+                  method: 'POST',
+                  body: formData,
+                  headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => {
+                  if (!response.ok) throw new Error('Form validation failed');
+
+                  // 2. بعت إيميل عن طريق EmailJS
+                  return emailjs.send("service_zi7069a", "template_1i0pf77", {
+                    from_name: form.querySelector('#name-field').value,
+                    from_email: form.querySelector('#email-field').value,
+                    subject: form.querySelector('#subject-field').value,
+                    message: form.querySelector('#message-field').value,
+                  });
+                })
+                .then(() => {
+                  loading.style.display = 'none';
+                  sentMsg.style.display = 'block';
+                  form.reset();
+                })
+                .catch(error => {
+                  loading.style.display = 'none';
+                  errorMsg.style.display = 'block';
+                  errorMsg.textContent = error.message || 'Something went wrong. Please try again.';
+                });
+              });
+            </script>
             
           </div><!-- End Contact Form -->
 

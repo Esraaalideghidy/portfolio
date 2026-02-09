@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ix=27nga@m)45=g^mg#ao2^guwesny*z9top-^k(6udgg9ylc^'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-ix=27nga@m)45=g^mg#ao2^guwesny*z9top-^k(6udgg9ylc^')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS += ['esraaaliabdelattifdeghidy.pythonanywhere.com']
 
 
 # Application definition
@@ -120,6 +122,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -134,5 +137,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'eali56167@gmail.com'
-EMAIL_HOST_PASSWORD = 'weor zjxf vkgj bvvx'  # لازم تعملي App Password من Google
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'eali56167@gmail.com')
+# Set in environment variables - لازم تعملي App Password من Google
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')

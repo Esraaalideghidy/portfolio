@@ -52,7 +52,9 @@
     <i class="header-toggle d-xl-none bi bi-list"></i>
 
     <div class="profile-img">
+      {% if profile and profile.image %}
       <img src="{{ profile.image.url }}" alt="" class="img-fluid rounded-circle" style="width: 120px; height: 120px;">
+      {% endif %}
     </div>
 
     <a class="logo d-flex align-items-center justify-content-center">
